@@ -185,7 +185,7 @@ $ export PATH=/uufs/chpc.utah.edu/common/home/u0101881/containers/charliecloud/n
 ```
 
 compile the MPI program in the container:
-``
+```
 $ ch-run -b /uufs:/uufs -b /scratch:/scratch /uufs/chpc.utah.edu/common/home/u0101881/containers/charliecloud/containers/temp/ubuntu1604openmpi3 -- bash
 $ cd
 $ cd ~u0101881/tests
