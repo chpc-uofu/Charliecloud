@@ -1,0 +1,50 @@
+FROM ubuntu1604
+
+RUN    apt-get update 
+
+# OS packages needed to build OpenMPI.
+RUN apt-get install -y \
+    file \
+    flex \
+    g++ \
+    gcc \
+    gfortran \
+    less \
+    libdb5.3-dev \
+    make \
+    wget
+
+# InfiniBand stack based on https://community.mellanox.com/docs/DOC-2431
+# note that this is probably not minimal install as it also installs kernel
+# modules which the container will not use
+RUN apt-get install -y dkms infiniband-diags libibverbs* ibacm librdmacm* libmlx4* libmlx5* mstflint libibcm.* libibmad.* libibumad* opensm srptools libmlx4-dev librdmacm-dev rdmacm-utils ibverbs-utils perftest vlan ibutils libnl-3-200 libnl-route-3-200 libnl-route-3-dev libnl-utils 
+
+RUN apt-get install -y libtool autoconf automake build-essential ibutils ibverbs-utils rdmacm-utils infiniband-diags perftest librdmacm-dev libibverbs-dev libmlx4-1 numactl libnuma-dev git libtool pkg-config libpciaccess0
+
+# Compile OpenMPI. We can't use the Debian package because
+# --disable-pty-support is needed to avoid "pipe function call failed when
+# setting up I/O forwarding subsystem".
+ENV MPI_URL https://www.open-mpi.org/software/ompi/v3.0/downloads
+ENV MPI_VERSION 3.0.0
+WORKDIR /usr/src
+RUN wget -nv ${MPI_URL}/openmpi-${MPI_VERSION}.tar.gz
+RUN tar xf openmpi-${MPI_VERSION}.tar.gz
+RUN    cd openmpi-${MPI_VERSION} \
+    && CFLAGS=-O3 \
+       CXXFLAGS=-O3 \
+       ./configure --prefix=/usr \
+                   --sysconfdir=/mnt/0 \
+                   --disable-pty-support \
+    && make -j$(getconf _NPROCESSORS_ONLN) install
+RUN rm -Rf openmpi-${MPI_VERSION}*
+
+# OS packages for CHPC's compatibility (LMod, etc)
+RUN mkdir /uufs /scratch
+RUN apt-get install -y \
+    lsb-release \ 
+    liblua5.1-0 liblua5.1-0-dev lua-filesystem-dev lua-filesystem lua-posix-dev lua-posix lua5.1 tcl tcl-dev lua-term lua-term-dev lua-json  
+#COPY /home/u0101881/charliecloud/containers/ubuntu1604openmpi2/91-chpc.sh /etc/profile.d/
+COPY 91-chpc.sh /etc/profile.d/
+RUN echo ". /etc/profile.d/91-chpc.sh" >> /etc/bash.bashrc
+RUN echo "export CHARLIECLOUD_CONTAINER=1" >> /etc/bash.bashrc
+ENV CHARLIECLOUD_CONTAINER 1
