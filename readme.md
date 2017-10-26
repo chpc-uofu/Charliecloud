@@ -132,7 +132,7 @@ ch-run -b /uufs:/uufs -b /scratch:/scratch /var/tmp/hello -- bash
 ```
 setenv PATH /uufs/chpc.utah.edu/common/home/u0101881/containers/charliecloud/std/bin:$PATH
 ```
-### running as and user with user namespaces
+### running as an user with user namespaces
 ```
 setenv PATH /uufs/chpc.utah.edu/common/home/u0101881/containers/charliecloud/namespace-oct17/bin:$PATH
 cd /uufs/chpc.utah.edu/common/home/u0101881/containers/charliecloud/containers
@@ -199,7 +199,7 @@ Hello world from processor em001, rank 0 out of 2 processors
 Hello world from processor em012, rank 1 out of 2 processors
 ```
 #### Container with IMB
-- base on ubuntu1604openmpi3, built on `singularity.chpc.utah.edu` in `/home/u0101881/charliecloud/containers/mpibench`
+- based on ubuntu1604openmpi3, built on `singularity.chpc.utah.edu` in `/home/u0101881/charliecloud/containers/mpibench`
 ```
 $ ch-build -t mpibench /home/u0101881/charliecloud/containers/mpibench
 $ ch-docker2tar mpibench /var/tmp
@@ -232,8 +232,11 @@ $ mpirun -np 2 ch-run -b /uufs:/uufs -b /scratch:/scratch /uufs/chpc.utah.edu/co
 ### Negatives
 - more complicated container deployment
  -- Docker local image repository is confusing to navigate in
- -- need to run a few commands to extract the container image from the Docker repo into a tar.gz file
-- does not seem to allow expanding the container into NFS mounted file system - the container needs to be expanded ot local drive
+ -- need to run a few commands to extract the container image from the Docker repo into a tar.gz file (especially wrt. Singularity 2.4 squashfs container format
+- more complicated GPU support (explicit installation of GPU stack in the container vs. Singularity --nv option)
+
+### Neutrals
+- MPI support is about the same as in Singularity (hand install IB drivers and MPI in the container)
 
 ## Things to note
  - in the SETUID install version, the ch-run does not include the --uid and --gid flags
