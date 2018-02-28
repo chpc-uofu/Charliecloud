@@ -62,7 +62,7 @@ Note that sudo is needed for running the tests, but not for running finished con
 
 ## CentOS7 installation
 
-First make sure that user namespaces are enabled in CentOS7:
+First make sure that user namespaces are enabled in CentOS7 (7.4 kernel):
 ```
 $ grubby --args="namespace.unpriv_enable=1" --update-kernel="$(grubby --default-kernel)"
 ```
@@ -70,6 +70,18 @@ and creating file `/etc/sysctl.d/51-userns.conf` with the following in it:
 ```
 user.max_user_namespaces = 32767
 ```
+CentOS 7.3 kernel option is "user_namespace.enable=1".
+
+To test that userNS is enabled, run
+```
+unshare -p -f -U -m --map-root-user id
+```
+
+CentOS 7.3 also does not allow to run mount namespace inside user namespace, which can be demonstrated by trying to run
+```
+unshare -p -f -U -m --map-root-user ls -Fla /proc/self/ns/{mnt,user}
+```
+
 ### The installation (done on singularity.chpc.utah.edu)
 
 Follow installation instructions at https://hpc.github.io/charliecloud/install.html 
